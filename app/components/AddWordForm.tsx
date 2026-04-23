@@ -45,7 +45,11 @@ export function AddWordForm({ word, onSuccess }: Props) {
     setLoading(false);
 
     if (error) {
-      notifications.show({ color: "red", title: "Error", message: error.message });
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: error.message,
+      });
     } else {
       notifications.show({
         color: "green",
@@ -63,16 +67,17 @@ export function AddWordForm({ word, onSuccess }: Props) {
         <TextInput
           label="Word"
           placeholder="CROSSWORD"
+          withAsterisk
           {...form.getInputProps("word")}
         />
         <TextInput
           label="Description / Clue"
           placeholder="A grid-based word puzzle"
+          withAsterisk
           {...form.getInputProps("description")}
         />
         <NumberInput
           label="Crossword index"
-          description="Which crossword was this word used in? (optional)"
           placeholder="1"
           min={1}
           {...form.getInputProps("crossword_index")}

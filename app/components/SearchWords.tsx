@@ -7,6 +7,7 @@ import {
   Alert,
   Button,
   Group,
+  Loader,
   Popover,
   Stack,
   Table,
@@ -48,19 +49,21 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
     const query = supabase.from("words").select("*");
     const filtered = isIndex
       ? query.eq("crossword_index", parseInt(trimmed, 10))
-      : query.ilike("word", trimmed.includes("*") ? trimmed.replace(/\*/g, "_") : `%${trimmed}%`);
+      : query.ilike(
+          "word",
+          trimmed.includes("*") ? trimmed.replace(/\*/g, "_") : `%${trimmed}%`,
+        );
 
-    filtered.order("word")
-      .then(({ data, error: err }) => {
-        if (cancelled) return;
-        setFetchedKey(currentKey);
-        if (err) {
-          setError(err.message);
-        } else {
-          setError(null);
-          setResults(data ?? []);
-        }
-      });
+    filtered.order("word").then(({ data, error: err }) => {
+      if (cancelled) return;
+      setFetchedKey(currentKey);
+      if (err) {
+        setError(err.message);
+      } else {
+        setError(null);
+        setResults(data ?? []);
+      }
+    });
 
     return () => {
       cancelled = true;
@@ -86,18 +89,11 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
   return (
     <Stack>
       <TextInput
-        label="Search words"
-        description="Use * as a single-character wildcard, e.g. *o*e matches HOME, LOVE, etc."
-        placeholder="*O*E"
+        size="lg"
+        placeholder="Enter w**d or number ..."
         value={query}
         onChange={(e) => setQuery(e.currentTarget.value)}
-        rightSection={
-          loading ? (
-            <Text size="xs" c="dimmed">
-              …
-            </Text>
-          ) : null
-        }
+        rightSection={loading ? <Loader size="sm" color="dark" /> : null}
       />
 
       {error && (
@@ -107,7 +103,9 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
       )}
 
       {hasQuery && !loading && !error && results.length === 0 && (
-        <Text c="dimmed">No words found.</Text>
+        <Text c="dimmed" ta="center">
+          No words found.
+        </Text>
       )}
 
       {hasQuery && results.length > 0 && (
