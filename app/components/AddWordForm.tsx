@@ -1,19 +1,27 @@
 "use client";
 
 import { supabase } from "@/app/lib/supabase";
+import type { Word } from "@/app/lib/types";
 import { Button, NumberInput, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
+import { IconCheck, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
 
-export function AddWordForm({ onSuccess }: { onSuccess: () => void }) {
+type Props = {
+  word?: Word;
+  onSuccess: () => void;
+};
+
+export function AddWordForm({ word, onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
+  const isEditing = !!word;
 
   const form = useForm({
     initialValues: {
-      word: "",
-      description: "",
-      crossword_index: "" as number | "",
+      word: word?.word ?? "",
+      description: word?.description ?? "",
+      crossword_index: (word?.crossword_index ?? "") as number | "",
     },
     validate: {
       word: (v) => (v.trim() ? null : "Word is required"),
@@ -23,27 +31,28 @@ export function AddWordForm({ onSuccess }: { onSuccess: () => void }) {
 
   async function handleSubmit(values: typeof form.values) {
     setLoading(true);
-    const { error } = await supabase.from("words").insert({
+    const payload = {
       word: values.word.trim().toUpperCase(),
       description: values.description.trim(),
       crossword_index:
         values.crossword_index === "" ? null : values.crossword_index,
-    });
+    };
+
+    const { error } = isEditing
+      ? await supabase.from("words").update(payload).eq("id", word.id)
+      : await supabase.from("words").insert(payload);
+
     setLoading(false);
 
     if (error) {
-      notifications.show({
-        color: "red",
-        title: "Error",
-        message: error.message,
-      });
+      notifications.show({ color: "red", title: "Error", message: error.message });
     } else {
       notifications.show({
         color: "green",
-        title: "Saved",
-        message: `"${values.word.toUpperCase()}" added successfully.`,
+        title: isEditing ? "Updated" : "Saved",
+        message: `"${payload.word}" ${isEditing ? "updated" : "added"} successfully.`,
       });
-      form.reset();
+      if (!isEditing) form.reset();
       onSuccess();
     }
   }
@@ -68,8 +77,15 @@ export function AddWordForm({ onSuccess }: { onSuccess: () => void }) {
           min={1}
           {...form.getInputProps("crossword_index")}
         />
-        <Button type="submit" loading={loading} w="fit-content">
-          Add word
+        <Button
+          type="submit"
+          loading={loading}
+          leftSection={
+            isEditing ? <IconCheck size={16} /> : <IconPlus size={16} />
+          }
+          fullWidth
+        >
+          {isEditing ? "Save changes" : "Add word"}
         </Button>
       </Stack>
     </form>
