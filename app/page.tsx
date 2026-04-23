@@ -3,7 +3,7 @@
 import { AddWordForm } from "@/app/components/AddWordForm";
 import { SearchWords } from "@/app/components/SearchWords";
 import type { Word } from "@/app/lib/types";
-import { Button, Container, Drawer, Group, Title } from "@mantine/core";
+import { Button, Container, Group, Modal, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
@@ -44,18 +44,18 @@ export default function Home() {
         </Button>
       </Group>
 
-      <Drawer
+      <Modal
         opened={drawerOpened}
         onClose={handleDrawerClose}
-        title={editWord ? "Edit Word" : "Add Word"}
-        position="right"
+        withCloseButton={false}
       >
         <AddWordForm
           key={editWord?.id ?? "new"}
           word={editWord ?? undefined}
           onSuccess={handleFormSuccess}
+          close={handleDrawerClose}
         />
-      </Drawer>
+      </Modal>
 
       <SearchWords onEditRequest={handleEditRequest} refreshKey={refreshKey} />
     </Container>

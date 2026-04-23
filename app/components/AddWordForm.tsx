@@ -2,7 +2,7 @@
 
 import { supabase } from "@/app/lib/supabase";
 import type { Word } from "@/app/lib/types";
-import { Button, NumberInput, Stack, TextInput } from "@mantine/core";
+import { Button, Group, NumberInput, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconPlus } from "@tabler/icons-react";
@@ -11,9 +11,10 @@ import { useState } from "react";
 type Props = {
   word?: Word;
   onSuccess: () => void;
+  close: () => void;
 };
 
-export function AddWordForm({ word, onSuccess }: Props) {
+export function AddWordForm({ word, onSuccess, close }: Props) {
   const [loading, setLoading] = useState(false);
   const isEditing = !!word;
 
@@ -65,33 +66,41 @@ export function AddWordForm({ word, onSuccess }: Props) {
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack>
         <TextInput
+          size="lg"
           label="Word"
           placeholder="CROSSWORD"
           withAsterisk
           {...form.getInputProps("word")}
         />
         <TextInput
+          size="lg"
           label="Description / Clue"
           placeholder="A grid-based word puzzle"
           withAsterisk
           {...form.getInputProps("description")}
         />
         <NumberInput
+          size="lg"
           label="Crossword index"
           placeholder="1"
           min={1}
           {...form.getInputProps("crossword_index")}
         />
-        <Button
-          type="submit"
-          loading={loading}
-          leftSection={
-            isEditing ? <IconCheck size={16} /> : <IconPlus size={16} />
-          }
-          fullWidth
-        >
-          {isEditing ? "Save changes" : "Add word"}
-        </Button>
+        <Group justify="space-between">
+          <Button size="lg" color="dark" variant="transparent" onClick={close}>
+            Cancel
+          </Button>
+          <Button
+            size="lg"
+            type="submit"
+            loading={loading}
+            leftSection={
+              isEditing ? <IconCheck size={16} /> : <IconPlus size={16} />
+            }
+          >
+            {isEditing ? "Save changes" : "Add word"}
+          </Button>
+        </Group>
       </Stack>
     </form>
   );
