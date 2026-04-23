@@ -44,7 +44,10 @@ export default function Home() {
         </Button>
       </Group>
 
+      <SearchWords onEditRequest={handleEditRequest} refreshKey={refreshKey} />
+
       <Modal
+        radius="lg"
         opened={drawerOpened}
         onClose={handleDrawerClose}
         withCloseButton={false}
@@ -56,8 +59,6 @@ export default function Home() {
           close={handleDrawerClose}
         />
       </Modal>
-
-      <SearchWords onEditRequest={handleEditRequest} refreshKey={refreshKey} />
     </Container>
   );
 }
