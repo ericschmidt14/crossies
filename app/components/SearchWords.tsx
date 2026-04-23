@@ -41,17 +41,16 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
     if (!trimmed) return;
 
     const currentKey = `${trimmed}-${refreshKey}`;
-    const pattern = trimmed.includes("*")
-      ? trimmed.replace(/\*/g, "_")
-      : `%${trimmed}%`;
+    const isIndex = /^\d+$/.test(trimmed);
 
     let cancelled = false;
 
-    supabase
-      .from("words")
-      .select("*")
-      .ilike("word", pattern)
-      .order("word")
+    const query = supabase.from("words").select("*");
+    const filtered = isIndex
+      ? query.eq("crossword_index", parseInt(trimmed, 10))
+      : query.ilike("word", trimmed.includes("*") ? trimmed.replace(/\*/g, "_") : `%${trimmed}%`);
+
+    filtered.order("word")
       .then(({ data, error: err }) => {
         if (cancelled) return;
         setFetchedKey(currentKey);
