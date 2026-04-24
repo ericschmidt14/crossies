@@ -112,6 +112,8 @@ export default function Home() {
         opened={drawerOpened}
         onClose={handleDrawerClose}
         withCloseButton={false}
+        styles={{ content: { background: "var(--background)" } }}
+        overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
       >
         <AddWordForm
           key={editWord?.id ?? "new"}
