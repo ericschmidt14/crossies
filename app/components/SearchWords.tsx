@@ -18,7 +18,15 @@ import {
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { IconEdit, IconTrash, IconX } from "@tabler/icons-react";
+import {
+  IconArrowDown,
+  IconArrowsUpDown,
+  IconArrowUp,
+  IconEdit,
+  IconSearch,
+  IconTrash,
+  IconX,
+} from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -26,39 +34,94 @@ type Props = {
   refreshKey: number;
 };
 
+type SortColumn = "word" | "description" | "crossword_index" | "length";
+type SortDir = "asc" | "desc";
+
+function SortIcon({
+  col,
+  sortColumn,
+  sortDir,
+}: {
+  col: SortColumn;
+  sortColumn: SortColumn;
+  sortDir: SortDir;
+}) {
+  if (sortColumn !== col)
+    return <IconArrowsUpDown size={14} style={{ opacity: 0.35 }} />;
+  return sortDir === "asc" ? (
+    <IconArrowUp size={14} />
+  ) : (
+    <IconArrowDown size={14} />
+  );
+}
+
+function SortableHeader({
+  col,
+  label,
+  sortColumn,
+  sortDir,
+  onSort,
+}: {
+  col: SortColumn;
+  label: string;
+  sortColumn: SortColumn;
+  sortDir: SortDir;
+  onSort: (col: SortColumn) => void;
+}) {
+  return (
+    <Group
+      gap={4}
+      wrap="nowrap"
+      style={{ cursor: "pointer", userSelect: "none" }}
+      onClick={() => onSort(col)}
+    >
+      {label}
+      <SortIcon col={col} sortColumn={sortColumn} sortDir={sortDir} />
+    </Group>
+  );
+}
+
 export function SearchWords({ onEditRequest, refreshKey }: Props) {
   const [query, setQuery] = useState("");
   const [debouncedQuery] = useDebouncedValue(query, 300);
+  const [showAll, setShowAll] = useState(false);
   const [results, setResults] = useState<Word[]>([]);
   const [fetchedKey, setFetchedKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "unused">("all");
+  const [sortColumn, setSortColumn] = useState<SortColumn>("word");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [openedDeleteId, setOpenedDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const hasQuery = debouncedQuery.trim().length > 0;
-  const queryKey = `${debouncedQuery.trim()}-${filter}-${refreshKey}`;
+  const hasQuery = debouncedQuery.trim().length > 0 || showAll;
+  const queryKey = `${debouncedQuery.trim()}|${showAll}|${filter}|${refreshKey}`;
   const loading = hasQuery && fetchedKey !== queryKey;
 
   useEffect(() => {
     const trimmed = debouncedQuery.trim();
-    if (!trimmed) return;
+    if (!trimmed && !showAll) return;
 
-    const currentKey = `${trimmed}-${filter}-${refreshKey}`;
-    const isIndex = /^\d+$/.test(trimmed);
+    const currentKey = `${trimmed}|${showAll}|${filter}|${refreshKey}`;
+    const isIndex = !!trimmed && /^\d+$/.test(trimmed);
 
     let cancelled = false;
 
-    const query = supabase.from("words").select("*");
-    const matched = isIndex
-      ? query.eq("crossword_index", parseInt(trimmed, 10))
-      : query.ilike(
-          "word",
-          trimmed.includes("*") ? trimmed.replace(/\*/g, "_") : `%${trimmed}%`,
-        );
-    const filtered = filter === "unused" ? matched.is("crossword_index", null) : matched;
+    const base = supabase.from("words").select("*");
+    const matched = !trimmed
+      ? base
+      : isIndex
+        ? base.eq("crossword_index", parseInt(trimmed, 10))
+        : base.ilike(
+            "word",
+            trimmed.includes("*")
+              ? trimmed.replace(/\*/g, "_")
+              : `%${trimmed}%`,
+          );
+    const filtered =
+      filter === "unused" ? matched.is("crossword_index", null) : matched;
 
-    filtered.order("word").then(({ data, error: err }) => {
+    filtered.then(({ data, error: err }) => {
       if (cancelled) return;
       setFetchedKey(currentKey);
       if (err) {
@@ -72,7 +135,43 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [debouncedQuery, filter, refreshKey]);
+  }, [debouncedQuery, showAll, filter, refreshKey]);
+
+  function toggleSort(col: SortColumn) {
+    if (sortColumn === col) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(col);
+      setSortDir("asc");
+    }
+  }
+
+  const sorted = [...results].sort((a, b) => {
+    const dir = sortDir === "asc" ? 1 : -1;
+    switch (sortColumn) {
+      case "word":
+        return dir * a.word.localeCompare(b.word);
+      case "description":
+        return dir * a.description.localeCompare(b.description);
+      case "length":
+        return dir * (a.word.length - b.word.length);
+      case "crossword_index": {
+        const ai = a.crossword_index ?? Infinity;
+        const bi = b.crossword_index ?? Infinity;
+        return dir * (ai - bi);
+      }
+    }
+  });
+
+  function handleQueryChange(value: string) {
+    setQuery(value);
+    if (showAll) setShowAll(false);
+  }
+
+  function handleClear() {
+    setQuery("");
+    setShowAll(false);
+  }
 
   async function handleDelete(id: string) {
     setDeleting(true);
@@ -96,15 +195,15 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
         size="lg"
         placeholder="Enter w**d or number ..."
         value={query}
-        onChange={(e) => setQuery(e.currentTarget.value)}
+        onChange={(e) => handleQueryChange(e.currentTarget.value)}
         rightSection={
           loading ? (
             <Loader size={16} color="gray" />
-          ) : query.length > 0 ? (
+          ) : query.length > 0 || showAll ? (
             <ActionIcon
               color="gray"
               variant="transparent"
-              onClick={() => setQuery("")}
+              onClick={handleClear}
               aria-label="Clear"
             >
               <IconX size={16} />
@@ -117,6 +216,17 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
         <Alert color="red" title="Error">
           {error}
         </Alert>
+      )}
+
+      {!hasQuery && !loading && !error && (
+        <Button
+          variant="transparent"
+          color="dark"
+          leftSection={<IconSearch size={16} />}
+          onClick={() => setShowAll(true)}
+        >
+          Show all words
+        </Button>
       )}
 
       {hasQuery && !loading && !error && results.length === 0 && (
@@ -144,18 +254,34 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
             <Table highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>Word</Table.Th>
-                  <Table.Th>Description</Table.Th>
-                  <Table.Th>Crossword #</Table.Th>
+                  {(
+                    [
+                      { col: "word", label: "Word" },
+                      { col: "description", label: "Description" },
+                      { col: "crossword_index", label: "Crossword#" },
+                      { col: "length", label: "Length" },
+                    ] as { col: SortColumn; label: string }[]
+                  ).map(({ col, label }) => (
+                    <Table.Th key={col}>
+                      <SortableHeader
+                        col={col}
+                        label={label}
+                        sortColumn={sortColumn}
+                        sortDir={sortDir}
+                        onSort={toggleSort}
+                      />
+                    </Table.Th>
+                  ))}
                   <Table.Th />
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {results.map((row) => (
+                {sorted.map((row) => (
                   <Table.Tr key={row.id}>
                     <Table.Td>{row.word}</Table.Td>
                     <Table.Td>{row.description}</Table.Td>
                     <Table.Td>{row.crossword_index ?? "—"}</Table.Td>
+                    <Table.Td>{row.word.length}</Table.Td>
                     <Table.Td>
                       <Group gap="xs" justify="flex-end" wrap="nowrap">
                         <ActionIcon
@@ -191,6 +317,7 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
                                   size="xs"
                                   loading={deleting}
                                   onClick={() => handleDelete(row.id)}
+                                  leftSection={<IconTrash size={12} />}
                                 >
                                   Delete
                                 </Button>
