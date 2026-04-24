@@ -2,7 +2,15 @@
 
 import { supabase } from "@/app/lib/supabase";
 import type { Word } from "@/app/lib/types";
-import { Box, Button, Group, Stack, TagsInput, TextInput } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Group,
+  Stack,
+  TagsInput,
+  Textarea,
+  TextInput,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconPlus } from "@tabler/icons-react";
@@ -77,10 +85,11 @@ export default function AddWordForm({
           withAsterisk
           {...form.getInputProps("word")}
         />
-        <TextInput
+        <Textarea
           size="lg"
           label="Description / Clue"
           placeholder="A grid-based word puzzle"
+          rows={3}
           withAsterisk
           {...form.getInputProps("description")}
         />
