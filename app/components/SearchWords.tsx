@@ -1,7 +1,7 @@
 "use client";
 
 import { supabase } from "@/app/lib/supabase";
-import type { Word } from "@/app/lib/types";
+import type { SortColumn, SortDir, Word } from "@/app/lib/types";
 import {
   ActionIcon,
   Alert,
@@ -18,70 +18,17 @@ import {
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import {
-  IconChevronUp,
-  IconEdit,
-  IconSearch,
-  IconSelector,
-  IconTrash,
-  IconX,
-} from "@tabler/icons-react";
+import { IconEdit, IconSearch, IconTrash, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import SortableHeader from "./SortableHeader";
 
-type Props = {
+export default function SearchWords({
+  onEditRequest,
+  refreshKey,
+}: {
   onEditRequest: (word: Word) => void;
   refreshKey: number;
-};
-
-type SortColumn = "word" | "description" | "crossword_indices" | "length";
-type SortDir = "asc" | "desc";
-
-function SortIcon({
-  col,
-  sortColumn,
-  sortDir,
-}: {
-  col: SortColumn;
-  sortColumn: SortColumn;
-  sortDir: SortDir;
 }) {
-  if (sortColumn !== col)
-    return <IconSelector size={14} style={{ opacity: 0.35 }} />;
-  return (
-    <IconChevronUp
-      size={14}
-      className={`${sortDir === "asc" ? "rotate-0" : "rotate-180"} transition-all duration-300`}
-    />
-  );
-}
-
-function SortableHeader({
-  col,
-  label,
-  sortColumn,
-  sortDir,
-  onSort,
-}: {
-  col: SortColumn;
-  label: string;
-  sortColumn: SortColumn;
-  sortDir: SortDir;
-  onSort: (col: SortColumn) => void;
-}) {
-  return (
-    <Group
-      gap={4}
-      wrap="nowrap"
-      style={{ cursor: "pointer", userSelect: "none" }}
-      onClick={() => onSort(col)}
-    >
-      {label}
-      <SortIcon col={col} sortColumn={sortColumn} sortDir={sortDir} />
-    </Group>
-  );
-}
-
-export function SearchWords({ onEditRequest, refreshKey }: Props) {
   const [query, setQuery] = useState("");
   const [debouncedQuery] = useDebouncedValue(query, 300);
   const [showAll, setShowAll] = useState(false);

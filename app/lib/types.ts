@@ -22,3 +22,11 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
+
+export type SortColumn =
+  | "word"
+  | "description"
+  | "crossword_indices"
+  | "length";
+
+export type SortDir = "asc" | "desc";

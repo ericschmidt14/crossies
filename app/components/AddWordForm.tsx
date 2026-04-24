@@ -9,13 +9,15 @@ import { IconCheck, IconPlus } from "@tabler/icons-react";
 import Image from "next/image";
 import { useState } from "react";
 
-type Props = {
+export default function AddWordForm({
+  word,
+  onSuccess,
+  close,
+}: {
   word?: Word;
   onSuccess: () => void;
   close: () => void;
-};
-
-export function AddWordForm({ word, onSuccess, close }: Props) {
+}) {
   const [loading, setLoading] = useState(false);
   const isEditing = !!word;
 
@@ -46,7 +48,11 @@ export function AddWordForm({ word, onSuccess, close }: Props) {
     setLoading(false);
 
     if (error) {
-      notifications.show({ color: "red", title: "Error", message: error.message });
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: error.message,
+      });
     } else {
       notifications.show({
         color: "green",
@@ -87,7 +93,9 @@ export function AddWordForm({ word, onSuccess, close }: Props) {
           onChange={(vals) =>
             form.setFieldValue(
               "crossword_indices",
-              vals.map((v) => parseInt(v, 10)).filter((n) => !isNaN(n) && n >= 1)
+              vals
+                .map((v) => parseInt(v, 10))
+                .filter((n) => !isNaN(n) && n >= 1),
             )
           }
         />

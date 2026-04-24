@@ -1,7 +1,7 @@
 "use client";
 
-import { AddWordForm } from "@/app/components/AddWordForm";
-import { SearchWords } from "@/app/components/SearchWords";
+import AddWordForm from "@/app/components/AddWordForm";
+import SearchWords from "@/app/components/SearchWords";
 import type { Word } from "@/app/lib/types";
 import { Button, Container, Drawer, Group, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
