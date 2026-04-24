@@ -21,6 +21,7 @@ import { notifications } from "@mantine/notifications";
 import { IconSearch, IconTrash, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import SortableHeader from "./SortableHeader";
+import WildcardHighlight from "./WildcardHighlight";
 
 export default function SearchWords({
   onEditRequest,
@@ -97,8 +98,9 @@ export default function SearchWords({
 
   const trimmed = debouncedQuery.trim();
   const isIndexSearch = /^\d+$/.test(trimmed);
+  const hasWildcard = trimmed.includes("*");
   const highlightTerm =
-    trimmed && !isIndexSearch && !trimmed.includes("*") ? trimmed : "";
+    trimmed && !isIndexSearch && !hasWildcard ? trimmed : "";
 
   const sorted = [...results].sort((a, b) => {
     const dir = sortDir === "asc" ? 1 : -1;
@@ -249,9 +251,13 @@ export default function SearchWords({
                   className="cursor-pointer"
                 >
                   <Table.Td>
-                    <Highlight highlight={highlightTerm} color="pink">
-                      {row.word}
-                    </Highlight>
+                    {hasWildcard ? (
+                      <WildcardHighlight word={row.word} pattern={trimmed} />
+                    ) : (
+                      <Highlight highlight={highlightTerm} color="pink">
+                        {row.word}
+                      </Highlight>
+                    )}
                   </Table.Td>
                   <Table.Td visibleFrom="sm">{row.description}</Table.Td>
                   <Table.Td>
