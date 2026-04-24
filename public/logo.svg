@@ -1,0 +1,26 @@
+<svg width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_3564_39)">
+<rect x="32" y="32" width="64" height="64" fill="#E64980" stroke="#E64980" stroke-width="4"/>
+<rect x="96" y="32" width="64" height="64" fill="#E64980" stroke="#E64980" stroke-width="4"/>
+<rect x="160" y="32" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+<rect x="224" y="32" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+<rect x="32" y="96" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+<rect x="96" y="96" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+<rect x="160" y="96" width="64" height="64" fill="#E64980" stroke="#E64980" stroke-width="4"/>
+<rect x="224" y="96" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+<rect x="32" y="160" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+<rect x="96" y="160" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+<rect x="160" y="160" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+<rect x="224" y="160" width="64" height="64" fill="#E64980" stroke="#E64980" stroke-width="4"/>
+<rect x="32" y="224" width="64" height="64" fill="#E64980" stroke="#E64980" stroke-width="4"/>
+<rect x="96" y="224" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+<rect x="160" y="224" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+<rect x="224" y="224" width="64" height="64" stroke="#E64980" stroke-width="4"/>
+</g>
+<rect x="34" y="34" width="252" height="252" rx="62" stroke="#E64980" stroke-width="4"/>
+<defs>
+<clipPath id="clip0_3564_39">
+<rect x="32" y="32" width="256" height="256" rx="64" fill="white"/>
+</clipPath>
+</defs>
+</svg>

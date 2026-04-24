@@ -257,12 +257,12 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
                   {(
                     [
                       { col: "word", label: "Word" },
-                      { col: "description", label: "Description" },
-                      { col: "crossword_index", label: "Crossword#" },
-                      { col: "length", label: "Length" },
-                    ] as { col: SortColumn; label: string }[]
-                  ).map(({ col, label }) => (
-                    <Table.Th key={col}>
+                      { col: "description", label: "Description", visibleFrom: "sm" },
+                      { col: "crossword_index", label: "Crossword#", visibleFrom: "sm" },
+                      { col: "length", label: "Length", visibleFrom: "sm" },
+                    ] as { col: SortColumn; label: string; visibleFrom?: string }[]
+                  ).map(({ col, label, visibleFrom }) => (
+                    <Table.Th key={col} visibleFrom={visibleFrom}>
                       <SortableHeader
                         col={col}
                         label={label}
@@ -279,9 +279,9 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
                 {sorted.map((row) => (
                   <Table.Tr key={row.id}>
                     <Table.Td>{row.word}</Table.Td>
-                    <Table.Td>{row.description}</Table.Td>
-                    <Table.Td>{row.crossword_index ?? "—"}</Table.Td>
-                    <Table.Td>{row.word.length}</Table.Td>
+                    <Table.Td visibleFrom="sm">{row.description}</Table.Td>
+                    <Table.Td visibleFrom="sm">{row.crossword_index ?? "—"}</Table.Td>
+                    <Table.Td visibleFrom="sm">{row.word.length}</Table.Td>
                     <Table.Td>
                       <Group gap="xs" justify="flex-end" wrap="nowrap">
                         <ActionIcon

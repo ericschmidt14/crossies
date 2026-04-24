@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "svg-to-ico public/logo.svg app/favicon.ico && next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -29,6 +29,7 @@
     "postcss": "^8.5.10",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
+    "svg-to-ico": "^1.1.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
