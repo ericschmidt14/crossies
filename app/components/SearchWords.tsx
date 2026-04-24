@@ -18,7 +18,7 @@ import {
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { IconEdit, IconSearch, IconTrash, IconX } from "@tabler/icons-react";
+import { IconSearch, IconTrash, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import SortableHeader from "./SortableHeader";
 
@@ -239,7 +239,11 @@ export default function SearchWords({
               </Table.Thead>
               <Table.Tbody>
                 {sorted.map((row) => (
-                  <Table.Tr key={row.id}>
+                  <Table.Tr
+                    key={row.id}
+                    onClick={() => onEditRequest(row)}
+                    className="cursor-pointer"
+                  >
                     <Table.Td>{row.word}</Table.Td>
                     <Table.Td visibleFrom="sm">{row.description}</Table.Td>
                     <Table.Td>
@@ -250,14 +254,6 @@ export default function SearchWords({
                     <Table.Td visibleFrom="sm">{row.word.length}</Table.Td>
                     <Table.Td>
                       <Group gap="xs" justify="flex-end" wrap="nowrap">
-                        <ActionIcon
-                          color="dark"
-                          variant="subtle"
-                          aria-label="Edit"
-                          onClick={() => onEditRequest(row)}
-                        >
-                          <IconEdit size={16} />
-                        </ActionIcon>
                         <Popover
                           opened={openedDeleteId === row.id}
                           onClose={() => setOpenedDeleteId(null)}
@@ -268,7 +264,10 @@ export default function SearchWords({
                             <ActionIcon
                               variant="subtle"
                               aria-label="Delete"
-                              onClick={() => setOpenedDeleteId(row.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenedDeleteId(row.id);
+                              }}
                             >
                               <IconTrash size={16} />
                             </ActionIcon>
@@ -282,7 +281,10 @@ export default function SearchWords({
                                 <Button
                                   size="xs"
                                   loading={deleting}
-                                  onClick={() => handleDelete(row.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(row.id);
+                                  }}
                                   leftSection={<IconTrash size={12} />}
                                 >
                                   Delete
@@ -291,7 +293,10 @@ export default function SearchWords({
                                   size="xs"
                                   color="dark"
                                   variant="subtle"
-                                  onClick={() => setOpenedDeleteId(null)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenedDeleteId(null);
+                                  }}
                                 >
                                   Cancel
                                 </Button>

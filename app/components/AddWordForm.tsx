@@ -86,9 +86,8 @@ export default function AddWordForm({
         />
         <TagsInput
           size="lg"
-          label="Crossword indices"
-          description="Which crosswords was this word used in?"
-          placeholder="Type a number and press Enter"
+          label="Which crosswords was it used in?"
+          description="Type a number and press Enter"
           value={form.values.crossword_indices.map(String)}
           onChange={(vals) =>
             form.setFieldValue(
