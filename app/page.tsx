@@ -15,8 +15,8 @@ import {
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconMoon, IconPlus, IconSun } from "@tabler/icons-react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
+import Logo from "./components/Logo";
 
 export default function Home() {
   const [drawerOpened, { open, close }] = useDisclosure(false);
@@ -59,7 +59,7 @@ export default function Home() {
     <Container w="100vw" py="xl">
       <Group justify="space-between" align="center" mb="lg">
         <Group align="center" gap="4px">
-          <Image src="/logo.svg" alt="Crossies Logo" width={32} height={32} />
+          <Logo />
           <Title>Crossies</Title>
         </Group>
         <Group gap="4px">

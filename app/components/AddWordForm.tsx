@@ -15,8 +15,8 @@ import {
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconPlus } from "@tabler/icons-react";
-import Image from "next/image";
 import { useState } from "react";
+import Logo from "./Logo";
 
 export default function AddWordForm({
   word,
@@ -77,7 +77,7 @@ export default function AddWordForm({
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack gap="lg" py="md">
         <Box mx="auto">
-          <Image src="/logo.svg" alt="Crossies Logo" width={36} height={36} />
+          <Logo />
         </Box>
         <TextInput
           size="lg"
