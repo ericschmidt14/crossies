@@ -7,8 +7,8 @@ import {
   Alert,
   Button,
   Group,
+  Highlight,
   Loader,
-  Paper,
   Popover,
   SegmentedControl,
   Stack,
@@ -94,6 +94,11 @@ export default function SearchWords({
       setSortDir("asc");
     }
   }
+
+  const trimmed = debouncedQuery.trim();
+  const isIndexSearch = /^\d+$/.test(trimmed);
+  const highlightTerm =
+    trimmed && !isIndexSearch && !trimmed.includes("*") ? trimmed : "";
 
   const sorted = [...results].sort((a, b) => {
     const dir = sortDir === "asc" ? 1 : -1;
@@ -201,116 +206,118 @@ export default function SearchWords({
               ]}
             />
           </Group>
-          <Paper withBorder radius="md">
-            <Table highlightOnHover>
-              <Table.Thead>
-                <Table.Tr>
-                  {(
-                    [
-                      { col: "word", label: "Word" },
-                      {
-                        col: "description",
-                        label: "Description",
-                        visibleFrom: "sm",
-                      },
-                      {
-                        col: "crossword_indices",
-                        label: "Used",
-                      },
-                      { col: "length", label: "Length", visibleFrom: "sm" },
-                    ] as {
-                      col: SortColumn;
-                      label: string;
-                      visibleFrom?: string;
-                    }[]
-                  ).map(({ col, label, visibleFrom }) => (
-                    <Table.Th key={col} visibleFrom={visibleFrom}>
-                      <SortableHeader
-                        col={col}
-                        label={label}
-                        sortColumn={sortColumn}
-                        sortDir={sortDir}
-                        onSort={toggleSort}
-                      />
-                    </Table.Th>
-                  ))}
-                  <Table.Th />
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {sorted.map((row) => (
-                  <Table.Tr
-                    key={row.id}
-                    onClick={() => onEditRequest(row)}
-                    className="cursor-pointer"
-                  >
-                    <Table.Td>{row.word}</Table.Td>
-                    <Table.Td visibleFrom="sm">{row.description}</Table.Td>
-                    <Table.Td>
-                      {row.crossword_indices.length > 0
-                        ? row.crossword_indices.join(", ")
-                        : "—"}
-                    </Table.Td>
-                    <Table.Td visibleFrom="sm">{row.word.length}</Table.Td>
-                    <Table.Td>
-                      <Group gap="xs" justify="flex-end" wrap="nowrap">
-                        <Popover
-                          opened={openedDeleteId === row.id}
-                          onClose={() => setOpenedDeleteId(null)}
-                          withArrow
-                          position="left"
-                        >
-                          <Popover.Target>
-                            <ActionIcon
-                              variant="subtle"
-                              aria-label="Delete"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenedDeleteId(row.id);
-                              }}
-                            >
-                              <IconTrash size={16} />
-                            </ActionIcon>
-                          </Popover.Target>
-                          <Popover.Dropdown>
-                            <Stack gap="xs">
-                              <Text size="sm">
-                                Delete &ldquo;{row.word}&rdquo;?
-                              </Text>
-                              <Group gap="xs">
-                                <Button
-                                  size="xs"
-                                  loading={deleting}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(row.id);
-                                  }}
-                                  leftSection={<IconTrash size={12} />}
-                                >
-                                  Delete
-                                </Button>
-                                <Button
-                                  size="xs"
-                                  color="dark"
-                                  variant="subtle"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setOpenedDeleteId(null);
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
-                              </Group>
-                            </Stack>
-                          </Popover.Dropdown>
-                        </Popover>
-                      </Group>
-                    </Table.Td>
-                  </Table.Tr>
+          <Table highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                {(
+                  [
+                    { col: "word", label: "Word" },
+                    {
+                      col: "description",
+                      label: "Description",
+                      visibleFrom: "sm",
+                    },
+                    {
+                      col: "crossword_indices",
+                      label: "Used",
+                    },
+                    { col: "length", label: "Length", visibleFrom: "sm" },
+                  ] as {
+                    col: SortColumn;
+                    label: string;
+                    visibleFrom?: string;
+                  }[]
+                ).map(({ col, label, visibleFrom }) => (
+                  <Table.Th key={col} visibleFrom={visibleFrom}>
+                    <SortableHeader
+                      col={col}
+                      label={label}
+                      sortColumn={sortColumn}
+                      sortDir={sortDir}
+                      onSort={toggleSort}
+                    />
+                  </Table.Th>
                 ))}
-              </Table.Tbody>
-            </Table>
-          </Paper>
+                <Table.Th />
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {sorted.map((row) => (
+                <Table.Tr
+                  key={row.id}
+                  onClick={() => onEditRequest(row)}
+                  className="cursor-pointer"
+                >
+                  <Table.Td>
+                    <Highlight highlight={highlightTerm} color="pink">
+                      {row.word}
+                    </Highlight>
+                  </Table.Td>
+                  <Table.Td visibleFrom="sm">{row.description}</Table.Td>
+                  <Table.Td>
+                    {row.crossword_indices.length > 0
+                      ? row.crossword_indices.join(", ")
+                      : null}
+                  </Table.Td>
+                  <Table.Td visibleFrom="sm">{row.word.length}</Table.Td>
+                  <Table.Td>
+                    <Group gap="xs" justify="flex-end" wrap="nowrap">
+                      <Popover
+                        opened={openedDeleteId === row.id}
+                        onClose={() => setOpenedDeleteId(null)}
+                        withArrow
+                        position="left"
+                      >
+                        <Popover.Target>
+                          <ActionIcon
+                            variant="subtle"
+                            aria-label="Delete"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenedDeleteId(row.id);
+                            }}
+                          >
+                            <IconTrash size={16} />
+                          </ActionIcon>
+                        </Popover.Target>
+                        <Popover.Dropdown>
+                          <Stack gap="xs">
+                            <Text size="sm">
+                              Delete &ldquo;{row.word}&rdquo;?
+                            </Text>
+                            <Group gap="xs">
+                              <Button
+                                size="xs"
+                                loading={deleting}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(row.id);
+                                }}
+                                leftSection={<IconTrash size={12} />}
+                              >
+                                Delete
+                              </Button>
+                              <Button
+                                size="xs"
+                                color="dark"
+                                variant="subtle"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenedDeleteId(null);
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </Group>
+                          </Stack>
+                        </Popover.Dropdown>
+                      </Popover>
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
         </>
       )}
     </Stack>
