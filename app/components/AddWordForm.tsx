@@ -2,10 +2,18 @@
 
 import { supabase } from "@/app/lib/supabase";
 import type { Word } from "@/app/lib/types";
-import { Button, Group, NumberInput, Stack, TextInput } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Group,
+  NumberInput,
+  Stack,
+  TextInput,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconPlus } from "@tabler/icons-react";
+import Image from "next/image";
 import { useState } from "react";
 
 type Props = {
@@ -64,7 +72,10 @@ export function AddWordForm({ word, onSuccess, close }: Props) {
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
-      <Stack>
+      <Stack gap="lg" py="md">
+        <Box mx="auto">
+          <Image src="/logo.svg" alt="Crossies Logo" width={36} height={36} />
+        </Box>
         <TextInput
           size="lg"
           label="Word"

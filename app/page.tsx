@@ -6,6 +6,7 @@ import type { Word } from "@/app/lib/types";
 import { Button, Container, Drawer, Group, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPlus } from "@tabler/icons-react";
+import Image from "next/image";
 import { useState } from "react";
 
 export default function Home() {
@@ -31,9 +32,11 @@ export default function Home() {
   return (
     <Container w="100vw" py="xl">
       <Group justify="space-between" mb="lg">
-        <Title>Crossies</Title>
+        <Group align="center" gap="8px">
+          <Image src="/logo.svg" alt="Crossies Logo" width={36} height={36} />
+          <Title>Crossies</Title>
+        </Group>
         <Button
-          variant="light"
           onClick={() => {
             setEditWord(null);
             open();
