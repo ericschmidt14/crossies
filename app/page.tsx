@@ -13,7 +13,7 @@ import {
   useComputedColorScheme,
   useMantineColorScheme,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconMoon, IconPlus, IconSun } from "@tabler/icons-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -28,6 +28,8 @@ export default function Home() {
   const computedColorScheme = useComputedColorScheme("light", {
     getInitialValueInEffect: true,
   });
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   function handleEditRequest(word: Word) {
     setEditWord(word);
@@ -55,15 +57,14 @@ export default function Home() {
 
   return (
     <Container w="100vw" py="xl">
-      <Group justify="space-between" mb="lg">
-        <Group align="center" gap="8px">
-          <Image src="/logo.svg" alt="Crossies Logo" width={36} height={36} />
+      <Group justify="space-between" align="center" mb="lg">
+        <Group align="center" gap="4px">
+          <Image src="/logo.svg" alt="Crossies Logo" width={32} height={32} />
           <Title>Crossies</Title>
         </Group>
-        <Group gap="0">
+        <Group gap="4px">
           {mounted ? (
             <ActionIcon
-              id="ThemeSwitch"
               size="lg"
               variant="transparent"
               onClick={() =>
@@ -80,15 +81,27 @@ export default function Home() {
               )}
             </ActionIcon>
           ) : null}
-          <Button
-            onClick={() => {
-              setEditWord(null);
-              open();
-            }}
-            leftSection={<IconPlus size={16} />}
-          >
-            Add Word
-          </Button>
+          {isMobile ? (
+            <ActionIcon
+              size="lg"
+              onClick={() => {
+                setEditWord(null);
+                open();
+              }}
+            >
+              <IconPlus size={16} />
+            </ActionIcon>
+          ) : (
+            <Button
+              onClick={() => {
+                setEditWord(null);
+                open();
+              }}
+              leftSection={<IconPlus size={16} />}
+            >
+              Add Word
+            </Button>
+          )}
         </Group>
       </Group>
 
