@@ -60,7 +60,7 @@ export default function Home() {
           <Image src="/logo.svg" alt="Crossies Logo" width={36} height={36} />
           <Title>Crossies</Title>
         </Group>
-        <Group gap="8px">
+        <Group gap="0">
           {mounted ? (
             <ActionIcon
               id="ThemeSwitch"
