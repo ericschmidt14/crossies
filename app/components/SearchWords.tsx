@@ -183,7 +183,9 @@ export default function SearchWords({
         step={1}
         value={lengthFilter}
         onChange={setLengthFilter}
-        label={(v) => (v === 0 ? "Any length" : `${v} letters`)}
+        label={(v) =>
+          v === 0 ? "Any length" : `${v} letter${v !== 1 ? "s" : ""}`
+        }
         marks={[
           { value: 0, label: "" },
           { value: 5, label: "5" },
@@ -220,7 +222,7 @@ export default function SearchWords({
         <>
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
-              {displayed.length} result{displayed.length > 1 ? "s" : ""}
+              {displayed.length} result{displayed.length !== 1 ? "s" : ""}
             </Text>
             <SegmentedControl
               value={filter}
