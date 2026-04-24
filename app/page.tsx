@@ -3,16 +3,31 @@
 import AddWordForm from "@/app/components/AddWordForm";
 import SearchWords from "@/app/components/SearchWords";
 import type { Word } from "@/app/lib/types";
-import { Button, Container, Drawer, Group, Title } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Container,
+  Drawer,
+  Group,
+  Title,
+  useComputedColorScheme,
+  useMantineColorScheme,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconPlus } from "@tabler/icons-react";
+import { IconMoon, IconPlus, IconSun } from "@tabler/icons-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [drawerOpened, { open, close }] = useDisclosure(false);
+  const [mounted, setMounted] = useState(false);
   const [editWord, setEditWord] = useState<Word | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const { setColorScheme, colorScheme } = useMantineColorScheme();
+  const computedColorScheme = useComputedColorScheme("light", {
+    getInitialValueInEffect: true,
+  });
 
   function handleEditRequest(word: Word) {
     setEditWord(word);
@@ -29,6 +44,15 @@ export default function Home() {
     handleDrawerClose();
   }
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("dark", colorScheme === "dark");
+  }, [colorScheme]);
+
   return (
     <Container w="100vw" py="xl">
       <Group justify="space-between" mb="lg">
@@ -36,15 +60,36 @@ export default function Home() {
           <Image src="/logo.svg" alt="Crossies Logo" width={36} height={36} />
           <Title>Crossies</Title>
         </Group>
-        <Button
-          onClick={() => {
-            setEditWord(null);
-            open();
-          }}
-          leftSection={<IconPlus size={16} />}
-        >
-          Add Word
-        </Button>
+        <Group gap="8px">
+          {mounted ? (
+            <ActionIcon
+              id="ThemeSwitch"
+              size="lg"
+              variant="transparent"
+              onClick={() =>
+                setColorScheme(
+                  computedColorScheme === "light" ? "dark" : "light",
+                )
+              }
+              aria-label="Toggle color scheme"
+            >
+              {colorScheme === "dark" ? (
+                <IconSun size={16} />
+              ) : (
+                <IconMoon size={16} />
+              )}
+            </ActionIcon>
+          ) : null}
+          <Button
+            onClick={() => {
+              setEditWord(null);
+              open();
+            }}
+            leftSection={<IconPlus size={16} />}
+          >
+            Add Word
+          </Button>
+        </Group>
       </Group>
 
       <SearchWords onEditRequest={handleEditRequest} refreshKey={refreshKey} />
