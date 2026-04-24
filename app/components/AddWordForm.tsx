@@ -87,7 +87,7 @@ export function AddWordForm({ word, onSuccess, close }: Props) {
           {...form.getInputProps("crossword_index")}
         />
         <Group justify="space-between">
-          <Button size="lg" color="dark" variant="transparent" onClick={close}>
+          <Button size="lg" color="gray" variant="transparent" onClick={close}>
             Cancel
           </Button>
           <Button
