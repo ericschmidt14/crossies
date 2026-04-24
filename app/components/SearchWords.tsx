@@ -61,7 +61,7 @@ export default function SearchWords({
         ? base.contains("crossword_indices", [parseInt(trimmed, 10)])
         : base.ilike(
             "word",
-            trimmed.includes("*")
+            trimmed.includes("*") || trimmed.includes("%")
               ? trimmed.replace(/\*/g, "_")
               : `%${trimmed}%`,
           );

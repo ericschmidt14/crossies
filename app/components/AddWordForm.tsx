@@ -105,6 +105,7 @@ export default function AddWordForm({
               <Kbd>.</Kbd>
             </>
           }
+          placeholder="1"
           value={form.values.crossword_indices.map(String)}
           splitChars={[",", ".", " "]}
           inputMode="decimal"
