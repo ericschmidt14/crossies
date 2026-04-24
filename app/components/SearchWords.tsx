@@ -11,6 +11,7 @@ import {
   Loader,
   Popover,
   SegmentedControl,
+  Slider,
   Stack,
   Table,
   Text,
@@ -39,6 +40,7 @@ export default function SearchWords({
   const [filter, setFilter] = useState<"all" | "unused">("all");
   const [sortColumn, setSortColumn] = useState<SortColumn>("word");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [lengthFilter, setLengthFilter] = useState(0);
   const [openedDeleteId, setOpenedDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -121,6 +123,11 @@ export default function SearchWords({
     }
   });
 
+  const displayed =
+    lengthFilter > 0
+      ? sorted.filter((r) => r.word.length === lengthFilter)
+      : sorted;
+
   function handleQueryChange(value: string) {
     setQuery(value);
     if (showAll) setShowAll(false);
@@ -168,6 +175,22 @@ export default function SearchWords({
             </ActionIcon>
           ) : null
         }
+        autoComplete="off"
+      />
+      <Slider
+        min={0}
+        max={15}
+        step={1}
+        value={lengthFilter}
+        onChange={setLengthFilter}
+        label={(v) => (v === 0 ? "Any length" : `${v} letters`)}
+        marks={[
+          { value: 0, label: "" },
+          { value: 5, label: "5" },
+          { value: 10, label: "10" },
+          { value: 15, label: "15" },
+        ]}
+        mb="lg"
       />
 
       {error && (
@@ -197,7 +220,7 @@ export default function SearchWords({
         <>
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
-              {results.length} result{results.length > 1 ? "s" : ""}
+              {displayed.length} result{displayed.length > 1 ? "s" : ""}
             </Text>
             <SegmentedControl
               value={filter}
@@ -244,7 +267,7 @@ export default function SearchWords({
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {sorted.map((row) => (
+              {displayed.map((row) => (
                 <Table.Tr
                   key={row.id}
                   onClick={() => onEditRequest(row)}
