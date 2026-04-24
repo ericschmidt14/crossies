@@ -19,11 +19,10 @@ import {
 import { useDebouncedValue } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import {
-  IconArrowDown,
-  IconArrowsUpDown,
-  IconArrowUp,
+  IconChevronUp,
   IconEdit,
   IconSearch,
+  IconSelector,
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
@@ -34,7 +33,7 @@ type Props = {
   refreshKey: number;
 };
 
-type SortColumn = "word" | "description" | "crossword_index" | "length";
+type SortColumn = "word" | "description" | "crossword_indices" | "length";
 type SortDir = "asc" | "desc";
 
 function SortIcon({
@@ -47,11 +46,12 @@ function SortIcon({
   sortDir: SortDir;
 }) {
   if (sortColumn !== col)
-    return <IconArrowsUpDown size={14} style={{ opacity: 0.35 }} />;
-  return sortDir === "asc" ? (
-    <IconArrowUp size={14} />
-  ) : (
-    <IconArrowDown size={14} />
+    return <IconSelector size={14} style={{ opacity: 0.35 }} />;
+  return (
+    <IconChevronUp
+      size={14}
+      className={`${sortDir === "asc" ? "rotate-0" : "rotate-180"} transition-all duration-300`}
+    />
   );
 }
 
@@ -111,7 +111,7 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
     const matched = !trimmed
       ? base
       : isIndex
-        ? base.eq("crossword_index", parseInt(trimmed, 10))
+        ? base.contains("crossword_indices", [parseInt(trimmed, 10)])
         : base.ilike(
             "word",
             trimmed.includes("*")
@@ -119,7 +119,9 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
               : `%${trimmed}%`,
           );
     const filtered =
-      filter === "unused" ? matched.is("crossword_index", null) : matched;
+      filter === "unused"
+        ? matched.filter("crossword_indices", "eq", "{}")
+        : matched;
 
     filtered.then(({ data, error: err }) => {
       if (cancelled) return;
@@ -155,11 +157,13 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
         return dir * a.description.localeCompare(b.description);
       case "length":
         return dir * (a.word.length - b.word.length);
-      case "crossword_index": {
-        const ai = a.crossword_index ?? Infinity;
-        const bi = b.crossword_index ?? Infinity;
+      case "crossword_indices": {
+        const ai = a.crossword_indices[0] ?? Infinity;
+        const bi = b.crossword_indices[0] ?? Infinity;
         return dir * (ai - bi);
       }
+      default:
+        return 0;
     }
   });
 
@@ -257,10 +261,21 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
                   {(
                     [
                       { col: "word", label: "Word" },
-                      { col: "description", label: "Description", visibleFrom: "sm" },
-                      { col: "crossword_index", label: "Crossword#", visibleFrom: "sm" },
+                      {
+                        col: "description",
+                        label: "Description",
+                        visibleFrom: "sm",
+                      },
+                      {
+                        col: "crossword_indices",
+                        label: "Used",
+                      },
                       { col: "length", label: "Length", visibleFrom: "sm" },
-                    ] as { col: SortColumn; label: string; visibleFrom?: string }[]
+                    ] as {
+                      col: SortColumn;
+                      label: string;
+                      visibleFrom?: string;
+                    }[]
                   ).map(({ col, label, visibleFrom }) => (
                     <Table.Th key={col} visibleFrom={visibleFrom}>
                       <SortableHeader
@@ -280,7 +295,11 @@ export function SearchWords({ onEditRequest, refreshKey }: Props) {
                   <Table.Tr key={row.id}>
                     <Table.Td>{row.word}</Table.Td>
                     <Table.Td visibleFrom="sm">{row.description}</Table.Td>
-                    <Table.Td visibleFrom="sm">{row.crossword_index ?? "—"}</Table.Td>
+                    <Table.Td>
+                      {row.crossword_indices.length > 0
+                        ? row.crossword_indices.join(", ")
+                        : "—"}
+                    </Table.Td>
                     <Table.Td visibleFrom="sm">{row.word.length}</Table.Td>
                     <Table.Td>
                       <Group gap="xs" justify="flex-end" wrap="nowrap">

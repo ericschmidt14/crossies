@@ -2,7 +2,7 @@ export type Word = {
   id: string;
   word: string;
   description: string;
-  crossword_index: number | null;
+  crossword_indices: number[];
   created_at: string;
 };
 

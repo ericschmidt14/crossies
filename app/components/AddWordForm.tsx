@@ -2,14 +2,7 @@
 
 import { supabase } from "@/app/lib/supabase";
 import type { Word } from "@/app/lib/types";
-import {
-  Box,
-  Button,
-  Group,
-  NumberInput,
-  Stack,
-  TextInput,
-} from "@mantine/core";
+import { Box, Button, Group, Stack, TagsInput, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconPlus } from "@tabler/icons-react";
@@ -30,7 +23,7 @@ export function AddWordForm({ word, onSuccess, close }: Props) {
     initialValues: {
       word: word?.word ?? "",
       description: word?.description ?? "",
-      crossword_index: (word?.crossword_index ?? "") as number | "",
+      crossword_indices: word?.crossword_indices ?? ([] as number[]),
     },
     validate: {
       word: (v) => (v.trim() ? null : "Word is required"),
@@ -43,8 +36,7 @@ export function AddWordForm({ word, onSuccess, close }: Props) {
     const payload = {
       word: values.word.trim().toUpperCase(),
       description: values.description.trim(),
-      crossword_index:
-        values.crossword_index === "" ? null : values.crossword_index,
+      crossword_indices: values.crossword_indices,
     };
 
     const { error } = isEditing
@@ -54,11 +46,7 @@ export function AddWordForm({ word, onSuccess, close }: Props) {
     setLoading(false);
 
     if (error) {
-      notifications.show({
-        color: "red",
-        title: "Error",
-        message: error.message,
-      });
+      notifications.show({ color: "red", title: "Error", message: error.message });
     } else {
       notifications.show({
         color: "green",
@@ -90,12 +78,18 @@ export function AddWordForm({ word, onSuccess, close }: Props) {
           withAsterisk
           {...form.getInputProps("description")}
         />
-        <NumberInput
+        <TagsInput
           size="lg"
-          label="Crossword index"
-          placeholder="1"
-          min={1}
-          {...form.getInputProps("crossword_index")}
+          label="Crossword indices"
+          description="Which crosswords was this word used in?"
+          placeholder="Type a number and press Enter"
+          value={form.values.crossword_indices.map(String)}
+          onChange={(vals) =>
+            form.setFieldValue(
+              "crossword_indices",
+              vals.map((v) => parseInt(v, 10)).filter((n) => !isNaN(n) && n >= 1)
+            )
+          }
         />
         <Group justify="space-between">
           <Button size="lg" color="gray" variant="transparent" onClick={close}>
