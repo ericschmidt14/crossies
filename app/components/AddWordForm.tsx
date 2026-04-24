@@ -98,6 +98,7 @@ export default function AddWordForm({
           label="Which crosswords was it used in?"
           description="Type a number and press Enter"
           value={form.values.crossword_indices.map(String)}
+          inputMode="numeric"
           onChange={(vals) =>
             form.setFieldValue(
               "crossword_indices",
