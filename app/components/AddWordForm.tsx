@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   Group,
+  Kbd,
   Stack,
   TagsInput,
   Textarea,
@@ -96,9 +97,17 @@ export default function AddWordForm({
         <TagsInput
           size="lg"
           label="Which crosswords was it used in?"
-          description="Type a number and press Enter"
+          description={
+            <>
+              <span>
+                Type a number and press <Kbd>Enter</Kbd> <Kbd>,</Kbd> or{" "}
+              </span>
+              <Kbd>.</Kbd>
+            </>
+          }
           value={form.values.crossword_indices.map(String)}
-          inputMode="numeric"
+          splitChars={[",", ".", " "]}
+          inputMode="decimal"
           onChange={(vals) =>
             form.setFieldValue(
               "crossword_indices",
