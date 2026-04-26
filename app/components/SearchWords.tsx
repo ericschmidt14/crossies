@@ -20,7 +20,7 @@ import {
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { IconSearch, IconTrash, IconX } from "@tabler/icons-react";
+import { IconPlus, IconSearch, IconTrash, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import SortableHeader from "./SortableHeader";
 import WildcardHighlight from "./WildcardHighlight";
@@ -50,6 +50,8 @@ export default function SearchWords({
   const [externalFetchedKey, setExternalFetchedKey] = useState<string | null>(
     null,
   );
+  const [externalOffset, setExternalOffset] = useState(0);
+  const [externalHasMore, setExternalHasMore] = useState(false);
 
   const hasQuery = debouncedQuery.trim().length > 0 || showAll;
   const queryKey = `${debouncedQuery.trim()}|${showAll}|${filter}|${refreshKey}`;
@@ -107,14 +109,18 @@ export default function SearchWords({
 
     fetch(`/api/suggest?${params}`)
       .then((r) => r.json())
-      .then((data: string[]) => {
+      .then((data: { words: string[]; hasMore: boolean }) => {
         if (cancelled) return;
-        setExternalResults(data);
+        setExternalResults(data.words);
+        setExternalHasMore(data.hasMore);
+        setExternalOffset(50);
         setExternalFetchedKey(`${t}|${lengthFilter}`);
       })
       .catch(() => {
         if (cancelled) return;
         setExternalResults([]);
+        setExternalHasMore(false);
+        setExternalOffset(0);
         setExternalFetchedKey(`${t}|${lengthFilter}`);
       });
 
@@ -122,6 +128,25 @@ export default function SearchWords({
       cancelled = true;
     };
   }, [debouncedQuery, lengthFilter]);
+
+  async function handleShowMore() {
+    const t = debouncedQuery.trim();
+    if (!t || /^\d+$/.test(t)) return;
+    const params = new URLSearchParams({
+      pattern: t,
+      offset: String(externalOffset),
+    });
+    if (lengthFilter > 0) params.set("length", String(lengthFilter));
+    try {
+      const r = await fetch(`/api/suggest?${params}`);
+      const data: { words: string[]; hasMore: boolean } = await r.json();
+      setExternalResults((prev) => [...prev, ...data.words]);
+      setExternalHasMore(data.hasMore);
+      setExternalOffset((prev) => prev + 50);
+    } catch {
+      // silently ignore
+    }
+  }
 
   function toggleSort(col: SortColumn) {
     if (sortColumn === col) {
@@ -394,7 +419,7 @@ export default function SearchWords({
       {(externalLoading || externalDisplayed.length > 0) &&
         trimmed.length > 0 &&
         !isIndexSearch && (
-          <Group gap="xs" mt="md">
+          <Group gap="xs">
             {externalDisplayed.map((word) => (
               <Badge
                 key={word}
@@ -406,6 +431,18 @@ export default function SearchWords({
                 {word}
               </Badge>
             ))}
+            {externalHasMore && (
+              <Badge
+                component="button"
+                variant="light"
+                color="gray"
+                style={{ cursor: "pointer" }}
+                onClick={handleShowMore}
+                leftSection={<IconPlus size={8} />}
+              >
+                Show more
+              </Badge>
+            )}
           </Group>
         )}
     </Stack>

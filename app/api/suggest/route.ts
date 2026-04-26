@@ -3,14 +3,17 @@ import wordList from "../../../data/german-words.json";
 
 const words = wordList as string[];
 
+const PAGE = 50;
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const rawPattern = (searchParams.get("pattern") ?? "").trim().toLowerCase();
   const length = parseInt(searchParams.get("length") ?? "0", 10);
+  const offset = parseInt(searchParams.get("offset") ?? "0", 10);
 
-  if (!rawPattern) return NextResponse.json([]);
+  if (!rawPattern) return NextResponse.json({ words: [], hasMore: false });
 
-  // Mirror umlaut replacement so patterns like "AE" match words already normalized in the list
+  // Mirror umlaut replacement so patterns match words already normalized in the list
   const pattern = rawPattern
     .replace(/ä/g, "ae")
     .replace(/ö/g, "oe")
@@ -29,10 +32,13 @@ export async function GET(request: NextRequest) {
     regex = new RegExp(escaped);
   }
 
-  const matches = words
-    .filter((w) => (length > 0 ? w.length === length : true) && regex.test(w))
-    .slice(0, 50)
+  const allMatches = words.filter(
+    (w) => (length > 0 ? w.length === length : true) && regex.test(w),
+  );
+
+  const page = allMatches
+    .slice(offset, offset + PAGE)
     .map((w) => w.toUpperCase());
 
-  return NextResponse.json(matches);
+  return NextResponse.json({ words: page, hasMore: allMatches.length > offset + PAGE });
 }
