@@ -36,6 +36,17 @@ export default function Home() {
     open();
   }
 
+  function handleWordSuggestion(wordText: string) {
+    setEditWord({
+      id: "",
+      word: wordText.toUpperCase(),
+      description: "",
+      crossword_indices: [],
+      created_at: "",
+    });
+    open();
+  }
+
   function handleDrawerClose() {
     setEditWord(null);
     close();
@@ -105,7 +116,11 @@ export default function Home() {
         </Group>
       </Group>
 
-      <SearchWords onEditRequest={handleEditRequest} refreshKey={refreshKey} />
+      <SearchWords
+        onEditRequest={handleEditRequest}
+        onWordSuggestion={handleWordSuggestion}
+        refreshKey={refreshKey}
+      />
 
       <Drawer
         position="right"

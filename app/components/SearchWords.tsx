@@ -5,6 +5,7 @@ import type { SortColumn, SortDir, Word } from "@/app/lib/types";
 import {
   ActionIcon,
   Alert,
+  Badge,
   Button,
   Group,
   Highlight,
@@ -26,9 +27,11 @@ import WildcardHighlight from "./WildcardHighlight";
 
 export default function SearchWords({
   onEditRequest,
+  onWordSuggestion,
   refreshKey,
 }: {
   onEditRequest: (word: Word) => void;
+  onWordSuggestion: (word: string) => void;
   refreshKey: number;
 }) {
   const [query, setQuery] = useState("");
@@ -43,6 +46,10 @@ export default function SearchWords({
   const [lengthFilter, setLengthFilter] = useState(0);
   const [openedDeleteId, setOpenedDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [externalResults, setExternalResults] = useState<string[]>([]);
+  const [externalFetchedKey, setExternalFetchedKey] = useState<string | null>(
+    null,
+  );
 
   const hasQuery = debouncedQuery.trim().length > 0 || showAll;
   const queryKey = `${debouncedQuery.trim()}|${showAll}|${filter}|${refreshKey}`;
@@ -89,6 +96,33 @@ export default function SearchWords({
     };
   }, [debouncedQuery, showAll, filter, refreshKey]);
 
+  useEffect(() => {
+    const t = debouncedQuery.trim();
+    if (!t || /^\d+$/.test(t)) return;
+
+    let cancelled = false;
+
+    const params = new URLSearchParams({ pattern: t });
+    if (lengthFilter > 0) params.set("length", String(lengthFilter));
+
+    fetch(`/api/suggest?${params}`)
+      .then((r) => r.json())
+      .then((data: string[]) => {
+        if (cancelled) return;
+        setExternalResults(data);
+        setExternalFetchedKey(`${t}|${lengthFilter}`);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setExternalResults([]);
+        setExternalFetchedKey(`${t}|${lengthFilter}`);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQuery, lengthFilter]);
+
   function toggleSort(col: SortColumn) {
     if (sortColumn === col) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -103,6 +137,11 @@ export default function SearchWords({
   const hasWildcard = trimmed.includes("*");
   const highlightTerm =
     trimmed && !isIndexSearch && !hasWildcard ? trimmed : "";
+
+  const externalKey = `${trimmed}|${lengthFilter}`;
+  const externalLoading =
+    trimmed.length > 0 && !isIndexSearch && externalFetchedKey !== externalKey;
+  const externalDisplayed = externalResults;
 
   const sorted = [...results].sort((a, b) => {
     const dir = sortDir === "asc" ? 1 : -1;
@@ -351,6 +390,24 @@ export default function SearchWords({
           </Table>
         </>
       )}
+
+      {(externalLoading || externalDisplayed.length > 0) &&
+        trimmed.length > 0 &&
+        !isIndexSearch && (
+          <Group gap="xs" mt="md">
+            {externalDisplayed.map((word) => (
+              <Badge
+                key={word}
+                component="button"
+                variant="light"
+                style={{ cursor: "pointer" }}
+                onClick={() => onWordSuggestion(word)}
+              >
+                {word}
+              </Badge>
+            ))}
+          </Group>
+        )}
     </Stack>
   );
 }

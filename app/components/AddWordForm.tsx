@@ -28,7 +28,7 @@ export default function AddWordForm({
   close: () => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const isEditing = !!word;
+  const isEditing = !!word?.id;
 
   const form = useForm({
     initialValues: {
