@@ -22,6 +22,7 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { IconPlus, IconSearch, IconTrash, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import InlineHighlight from "./InlineHighlight";
 import SortableHeader from "./SortableHeader";
 import WildcardHighlight from "./WildcardHighlight";
 
@@ -428,7 +429,11 @@ export default function SearchWords({
                 style={{ cursor: "pointer" }}
                 onClick={() => onWordSuggestion(word)}
               >
-                {word}
+                {hasWildcard ? (
+                  <WildcardHighlight word={word} pattern={trimmed} compact />
+                ) : (
+                  <InlineHighlight word={word} term={highlightTerm} />
+                )}
               </Badge>
             ))}
             {externalHasMore && (

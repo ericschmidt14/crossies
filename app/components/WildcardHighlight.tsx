@@ -5,9 +5,11 @@ import { Mark } from "@mantine/core";
 export default function WildcardHighlight({
   word,
   pattern,
+  compact = false,
 }: {
   word: string;
   pattern: string;
+  compact?: boolean;
 }) {
   const parts = pattern.toUpperCase().split("*");
   const regexStr = parts
@@ -36,7 +38,7 @@ export default function WildcardHighlight({
     <>
       {segments.map((seg, i) =>
         seg.highlight ? (
-          <Mark key={i} color="pink">
+          <Mark key={i} color="pink" py={compact ? 0 : undefined}>
             {seg.text}
           </Mark>
         ) : (
