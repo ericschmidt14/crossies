@@ -160,7 +160,7 @@ export default function SearchWords({
 
   const trimmed = debouncedQuery.trim();
   const isIndexSearch = /^\d+$/.test(trimmed);
-  const hasWildcard = trimmed.includes("*");
+  const hasWildcard = trimmed.includes("*") || trimmed.includes("%");
   const highlightTerm =
     trimmed && !isIndexSearch && !hasWildcard ? trimmed : "";
 
