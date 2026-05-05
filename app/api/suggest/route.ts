@@ -20,12 +20,13 @@ export async function GET(request: NextRequest) {
     .replace(/ü/g, "ue")
     .replace(/ß/g, "ss");
 
-  const hasWildcard = pattern.includes("*");
+  const hasWildcard = pattern.includes("*") || pattern.includes("%");
   let regex: RegExp;
   if (hasWildcard) {
     const escaped = pattern
       .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
-      .replace(/\*/g, ".");
+      .replace(/\*/g, ".")    // single-char wildcard
+      .replace(/%/g, ".*");   // multi-char wildcard
     regex = new RegExp(`^${escaped}$`);
   } else {
     const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
